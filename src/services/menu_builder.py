@@ -30,22 +30,38 @@ class MenuBuilder:
             "dish_name": [
                 dish.name
                 for dish in self.menu_data.dishes
-                if restriction not in dish.get_restrictions()
+                if restriction is None
+                or restriction not in dish.get_restrictions()
+                if self.inventory.check_recipe_availability(
+                    dish.get_ingredients()
+                )
             ],
             "ingredients": [
                 dish.get_ingredients()
                 for dish in self.menu_data.dishes
-                if restriction not in dish.get_restrictions()
+                if restriction is None
+                or restriction not in dish.get_restrictions()
+                if self.inventory.check_recipe_availability(
+                    dish.get_ingredients()
+                )
             ],
             "price": [
                 dish.price
                 for dish in self.menu_data.dishes
-                if restriction not in dish.get_restrictions()
+                if restriction is None
+                or restriction not in dish.get_restrictions()
+                if self.inventory.check_recipe_availability(
+                    dish.get_ingredients()
+                )
             ],
             "restrictions": [
                 dish.get_restrictions()
                 for dish in self.menu_data.dishes
-                if restriction not in dish.get_restrictions()
+                if restriction is None
+                or restriction not in dish.get_restrictions()
+                if self.inventory.check_recipe_availability(
+                    dish.get_ingredients()
+                )
             ],
         }
 
