@@ -1,55 +1,79 @@
-from src.models.dish import Dish, Ingredient
-import pytest
+from src.models.dish import Dish
+from src.models.ingredient import Ingredient, Restriction
+from pytest import fixture, raises
 
 
-@pytest.fixture
-def ingredient():
+@fixture
+def ingredient1():
     return Ingredient("queijo mussarela")
 
 
+@fixture
+def ingredient2():
+    return Ingredient("farinha")
+
+
+@fixture
+def ingredient3():
+    return Ingredient("ovo")
+
+
+@fixture
+def dish1():
+    return Dish("Pizza Margherita", 29.99)
+
+
+@fixture
+def dish2():
+    return Dish("Pizza Margherita", 29.99)
+
+
+@fixture
+def dish3():
+    return Dish("Alfredo", 25.80)
+
+
 # Req 2
-def test_dish(ingredient):
-    # Test instance creation with valid price
-    dish = Dish("Pizza Margherita", 29.99)
-    assert dish.name == "Pizza Margherita"
-    assert dish.price == 29.99
-    assert dish.recipe == {}
+def test_dish(dish1, dish2, dish3, ingredient1, ingredient2, ingredient3):
+    dish = Dish("Pizza", 10.99)
+    assert dish1.name == "Pizza Margherita"
+    assert dish1.price == 29.99
+    assert dish1.recipe == {}
 
-    # Test instance creation with invalid price (not a float)
-    with pytest.raises(TypeError):
-        Dish("Invalid Dish", "price")
+    assert dish1 == dish2
+    assert hash(dish1) == hash(dish2)
 
-    # Test instance creation with invalid price (less than or equal to zero)
-    with pytest.raises(ValueError):
-        Dish("Invalid Dish", 0)
+    assert dish1 != dish3
+    assert hash(dish1) != hash(dish3)
 
-    # Test __repr__ method
-    expected_repr = "Dish('Pizza Margherita', R$29.99)"
-    assert repr(dish) == expected_repr
+    assert repr(dish1) == "Dish('Pizza Margherita', R$29.99)"
 
-    # Test __eq__ method with the same dish
-    dish2 = Dish("Pizza Margherita", 29.99)
-    assert dish.__eq__(dish2)
+    with raises(TypeError):
+        Dish("Pizza", "10.99")
 
-    # Test __eq__ method with different dishes
-    dish3 = Dish("Pepperoni Pizza", 35.99)
-    assert not dish.__eq__(dish3)
+    with raises(ValueError):
+        Dish("Pizza", -10.99)
 
-    # Test __hash__ method
-    assert hash(dish) == hash(dish2)
+    dish1.add_ingredient_dependency(ingredient1, 2)
+    dish2.add_ingredient_dependency(ingredient2, 1)
+    dish3.add_ingredient_dependency(ingredient3, 3)
 
-    # Test add_ingredient_dependency method
-    dish.add_ingredient_dependency(ingredient, 2)
-    assert dish.recipe == {ingredient: 2}
+    assert dish1.recipe.get(ingredient1) == 2
+    assert dish2.recipe.get(ingredient2) == 1
+    assert dish3.recipe.get(ingredient3) == 3
 
-    # Test get_restrictions method
-    ingredient.add_restriction("Vegan")
-    assert dish.get_restrictions() == {"Vegan"}
+    dish1.add_ingredient_dependency(ingredient1, 2)
+    dish2.add_ingredient_dependency(ingredient2, 1)
+    dish3.add_ingredient_dependency(ingredient3, 3)
 
-    # Test get_ingredients method
-    assert dish.get_ingredients() == {ingredient}
+    restrictions = dish1.get_restrictions()
+    expected_restrictions = {Restriction.LACTOSE, Restriction.ANIMAL_DERIVED}
+    assert restrictions == expected_restrictions
 
+    dish1.add_ingredient_dependency(ingredient1, 2)
+    dish2.add_ingredient_dependency(ingredient2, 1)
+    dish3.add_ingredient_dependency(ingredient3, 3)
 
-if __name__ == '__main__':
-    pytest.main()
-
+    ingredients = dish1.get_ingredients()
+    expected_ingredients = {ingredient1}
+    assert ingredients == expected_ingredients
